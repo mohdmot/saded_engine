@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title id="pageTitle">Saded Engine Dashboard | لوحة التحكم</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary-glow: #38bdf8;
+            --secondary-glow: #a78bfa;
+            --bg-dark: #0f172a;
+            --card-bg: rgba(30, 41, 59, 0.7);
+        }
+
+        body {
+            background: radial-gradient(circle at top right, #1e293b, #0f172a);
+            color: #f8fafc;
+            font-family: 'Cairo', sans-serif;
+            min-height: 100vh;
+            padding-bottom: 50px;
+            transition: all 0.3s ease;
+        }
+
+        h6, td, label, input::placeholder, textarea::placeholder {
+          color: #ffffff !important;
+        }
+
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .navbar {
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 30px;
+        }
+
+        .logo-img { height: 45px; transition: opacity 0.3s; }
+
+        .stat-icon {
+            width: 50px; height: 50px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 12px; font-size: 20px; margin-bottom: 15px;
+        }
+
+        .table-container { border-radius: 15px; overflow: hidden; }
+        .table { --bs-table-bg: transparent; --bs-table-color: #e2e8f0; min-width: 600px; }
+        .table thead th { background: rgba(255, 255, 255, 0.05); color: #ffffff; padding: 15px; border: none; }
+        .table tbody td { padding: 15px; border-color: rgba(255, 255, 255, 0.05); vertical-align: middle; }
+
+        .badge-score { padding: 6px 12px; border-radius: 8px; font-weight: 600; font-size: 0.8rem; }
+        .score-high { background: rgba(239, 68, 68, 0.2); color: #ef4444; border: 1px solid #ef4444; }
+        .score-mid { background: rgba(245, 158, 11, 0.2); color: #f59e0b; border: 1px solid #f59e0b; }
+        .score-low { background: rgba(34, 197, 94, 0.2); color: #22c55e; border: 1px solid #22c55e; }
+
+        .form-control {
+            background: rgba(15, 23, 42, 0.6) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white !important;
+            border-radius: 10px;
+        }
+
+        .btn-gradient {
+            background: linear-gradient(90deg, #38bdf8, #818cf8);
+            border: none; color: white; font-weight: 600;
+            padding: 10px 25px; border-radius: 10px; transition: all 0.3s ease;
+        }
+        .btn-gradient:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(56, 189, 248, 0.4); color: white; }
+
+        /* Modal Styling */
+        .modal-content {
+            background: #1e293b;
+            border: 1px solid var(--primary-glow);
+            border-radius: 20px;
+            color: white;
+        }
+
+        .copy-btn {
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 5px;
+            background: rgba(255,255,255,0.1);
+            transition: 0.2s;
+        }
+        .copy-btn:hover { background: var(--primary-glow); color: #000; }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar sticky-top">
+    <div class="container d-flex justify-content-between align-items-center">
+        <div class="logo-container">
+            <img id="mainLogo" src="assets/logo-ar.png" alt="Logo" class="logo-img" onerror="this.src='https://cdn-icons-png.flaticon.com/512/2103/2103633.png'">
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-light btn-sm" onclick="toggleLanguage()">
+                <i class="fas fa-language me-1"></i> <span id="langBtnText">English</span>
+            </button>
+            <button class="btn btn-outline-info btn-sm" onclick="loadData()">
+                <i class="fas fa-sync-alt me-1"></i> <span id="refreshBtnText">تحديث البيانات</span>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-md-4 mb-3">
+            <div class="glass-card p-4 h-100">
+                <div class="stat-icon bg-danger text-white"><i class="fas fa-exclamation-triangle"></i></div>
+                <h6 id="textSuspicious">المدخلات المشكوك فيها</h6>
+                <h2 id="totalSuspicious">--</h2>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="glass-card p-4 h-100">
+                <div class="stat-icon bg-primary text-white"><i class="fas fa-chart-line"></i></div>
+                <h6 id="textAvgScore">متوسط تقييم الشذوذ</h6>
+                <h2 id="avgScore">--</h2>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="glass-card p-4 h-100">
+                <div class="stat-icon bg-success text-white"><i class="fas fa-check-circle"></i></div>
+                <h6 id="textSystemStatus">حالة النظام</h6>
+                <h2 id="textStatusActive" class="text-success" style="font-size: 1.5rem;">يعمل بكفاءة</h2>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="glass-card p-4 table-container h-100">
+                <h5 class="mb-4"><i class="fas fa-list me-2 text-info"></i> <span id="textRecentRecords">السجلات المكتشفة مؤخراً</span></h5>
+                <div class="table-responsive">
+                    <table class="table align-middle">
+                        <thead>
+                            <tr>
+                                <th id="thId">ID الاستبيان</th>
+                                <th id="thScore">درجة الشذوذ</th>
+                                <th id="thResponse">الرد (JSON)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4 mb-4">
+            <div class="glass-card p-4 h-100">
+                <h5 class="mb-4"><i class="fas fa-plus-circle me-2 text-info"></i> <span id="textManualAdd">إضافة رد يدوي</span></h5>
+                <div class="mb-3">
+                    <label id="labelSurveyId" class="form-label small">رقم الاستبيان (Survey ID)</label>
+                    <input id="surveyId" class="form-control form-control-lg" placeholder="101">
+                </div>
+                <div class="mb-3">
+                    <label id="labelResponseData" class="form-label small">بيانات الرد (Response JSON)</label>
+                    <textarea id="responseData" rows="6" class="form-control" placeholder='{"q1": "answer"}'></textarea>
+                </div>
+                <button id="btnSubmit" class="btn btn-gradient w-100 mb-3" onclick="submitManual()">
+                    <i class="fas fa-paper-plane me-2"></i> تحليل وإرسال
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="resultModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content glass-card">
+            <div class="modal-header border-0">
+                <h5 class="modal-title" id="modalTitle">نتيجة التحليل</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center p-4">
+                <div id="modalIcon" class="mb-3"></div>
+                <div class="display-6 mb-2" id="modalScore">--</div>
+                <div class="text-info mb-3" id="modalTime"></div>
+                <p id="modalDesc" class="text-light"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let currentLang = 'ar';
+    const translations = {
+        ar: {
+            langBtn: "English",
+            pageTitle: "Saded Engine Dashboard | لوحة التحكم",
+            refresh: "تحديث البيانات",
+            suspicious: "المدخلات المشكوك فيها",
+            avgScore: "متوسط تقييم الشذوذ",
+            systemStatus: "حالة النظام",
+            statusActive: "يعمل بكفاءة",
+            recentRecords: "السجلات المكتشفة مؤخراً",
+            thId: "ID الاستبيان",
+            thScore: "درجة الشذوذ",
+            thResponse: "الرد (JSON)",
+            manualAdd: "إضافة رد يدوي",
+            labelId: "رقم الاستبيان (Survey ID)",
+            labelData: "بيانات الرد (Response JSON)",
+            btnSubmit: "تحليل وإرسال",
+            modalTitle: "نتيجة التحليل الرقمي",
+            timeTaken: "وقت المعالجة:",
+            sec: "ثواني",
+            copyTip: "تم النسخ بنجاح"
+        },
+        en: {
+            langBtn: "العربية",
+            pageTitle: "Saded Engine Dashboard",
+            refresh: "Refresh Data",
+            suspicious: "Suspicious Inputs",
+            avgScore: "Avg Anomaly Score",
+            systemStatus: "System Status",
+            statusActive: "Running Smoothly",
+            recentRecords: "Recently Detected Records",
+            thId: "Survey ID",
+            thScore: "Anomaly Score",
+            thResponse: "Response (JSON)",
+            manualAdd: "Manual Response Add",
+            labelId: "Survey ID",
+            labelData: "Response JSON Data",
+            btnSubmit: "Analyze & Send",
+            modalTitle: "Analysis Result",
+            timeTaken: "Processing Time:",
+            sec: "seconds",
+            copyTip: "Copied to clipboard"
+        }
+    };
+
+    function toggleLanguage() {
+        currentLang = currentLang === 'ar' ? 'en' : 'ar';
+        const html = document.documentElement;
+        html.lang = currentLang;
+        html.dir = currentLang === 'ar' ? 'rtl' : 'ltr';
+        
+        // تبديل الشعار
+        document.getElementById("mainLogo").src = `assets/logo-${currentLang}.png`;
+        
+        // تحديث النصوص
+        const t = translations[currentLang];
+        document.getElementById("pageTitle").innerText = t.pageTitle;
+        document.getElementById("langBtnText").innerText = t.langBtn;
+        document.getElementById("refreshBtnText").innerText = t.refresh;
+        document.getElementById("textSuspicious").innerText = t.suspicious;
+        document.getElementById("textAvgScore").innerText = t.avgScore;
+        document.getElementById("textSystemStatus").innerText = t.systemStatus;
+        document.getElementById("textStatusActive").innerText = t.statusActive;
+        document.getElementById("textRecentRecords").innerText = t.recentRecords;
+        document.getElementById("thId").innerText = t.thId;
+        document.getElementById("thScore").innerText = t.thScore;
+        document.getElementById("thResponse").innerText = t.thResponse;
+        document.getElementById("textManualAdd").innerText = t.manualAdd;
+        document.getElementById("labelSurveyId").innerText = t.labelId;
+        document.getElementById("labelResponseData").innerText = t.labelData;
+        document.getElementById("btnSubmit").innerHTML = `<i class="fas fa-paper-plane me-2"></i> ${t.btnSubmit}`;
+        document.getElementById("modalTitle").innerText = t.modalTitle;
+
+        loadData(); // إعادة تحميل الجدول لتحديث نصوص الـ Tooltips
+    }
+
+    async function copyJson(text, el) {
+        await navigator.clipboard.writeText(text);
+        const originalHtml = el.innerHTML;
+        el.innerHTML = `<i class="fas fa-check text-success"></i>`;
+        setTimeout(() => el.innerHTML = originalHtml, 2000);
+    }
+
+    async function loadData() {
+        try {
+            const res = await fetch("/api/suspicious");
+            const data = await res.json();
+            const table = document.getElementById("tableBody");
+            table.innerHTML = "";
+
+            let totalScore = 0;
+            
+            data.forEach(row => {
+                const surveyId = row.survey_id || "N/A";
+                const score = parseFloat(row["score"]) || 0; 
+                const cleanResponse = { ...row };
+                delete cleanResponse.survey_id;
+                delete cleanResponse["score"];
+                const jsonStr = JSON.stringify(cleanResponse);
+
+                totalScore += score;
+                let badgeClass = score >= 5 ? "score-high" : (score >= 2 ? "score-mid" : "score-low");
+                let icon = score >= 5 ? "fa-radiation" : (score >= 2 ? "fa-exclamation" : "fa-check");
+
+                table.innerHTML += `
+                <tr>
+                    <td><span class="fw-bold">#${surveyId}</span></td>
+                    <td><span class="badge-score ${badgeClass}"><i class="fas ${icon} me-1"></i> ${score.toFixed(3)}</span></td>
+                    <td class="d-flex align-items-center gap-2">
+                        <code class="text-info small text-truncate" style="max-width: 200px;">${jsonStr}</code>
+                        <span class="copy-btn" onclick='copyJson(\`${jsonStr}\`, this)' title="Copy JSON">
+                            <i class="far fa-copy"></i>
+                        </span>
+                    </td>
+                </tr>`;
+            });
+
+            document.getElementById("totalSuspicious").innerText = data.length;
+            document.getElementById("avgScore").innerText = data.length ? (totalScore / data.length).toFixed(2) : "0.00";
+
+        } catch (error) {
+            console.error("Error:", error);
+            document.getElementById("tableBody").innerHTML = `<tr><td colspan='3' class='text-center text-danger'>API Error</td></tr>`;
+        }
+    }
+
+    async function submitManual() {
+        const sid = document.getElementById("surveyId").value;
+        const rData = document.getElementById("responseData").value;
+        const myModal = new bootstrap.Modal(document.getElementById('resultModal'));
+
+        try {
+            const parsed = JSON.parse(rData);
+            const res = await fetch("/submit/" + sid, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(parsed)
+            });
+
+            const result = await res.json();
+            const t = translations[currentLang];
+            
+            // تحديث محتوى الـ Modal
+            document.getElementById("modalScore").innerText = `Score: ${result.anomaly_score}`;
+            document.getElementById("modalTime").innerText = `${t.timeTaken} ${result.time || 0} ${t.sec}`;
+            document.getElementById("modalIcon").innerHTML = result.anomaly_score > 5 
+                ? '<i class="fas fa-exclamation-triangle fa-4x text-danger animate__animated animate__pulse animate__infinite"></i>' 
+                : '<i class="fas fa-check-circle fa-4x text-success"></i>';
+            
+            myModal.show();
+            loadData();
+        } catch (e) {
+            alert(currentLang === 'ar' ? "خطأ في البيانات المرسلة" : "Error in submitted data");
+        }
+    }
+
+    loadData();
+</script>
+
+</body>
+</html>

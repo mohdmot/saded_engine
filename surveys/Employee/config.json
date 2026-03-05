@@ -1,0 +1,8 @@
+{
+  "numerical_columns": ["JoiningYear","PaymentTier","Age", "ExperienceInCurrentDomain", "LeaveOrNot"],
+  "categorical_columns": ["Education", "Gender", "EverBenched"],
+  "columns_ignored": ["City"],
+  "correlation_top_k": 4,
+  "suspicion_threshold": 1.8,
+  "min_training_samples": 20
+}
